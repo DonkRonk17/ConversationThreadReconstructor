@@ -1,0 +1,23 @@
+# ConversationThreadReconstructor Requirements
+# ============================================
+#
+# This tool uses ZERO external dependencies!
+# All functionality is built with Python 3.8+ standard library:
+#
+# - sqlite3: Database access
+# - json: JSON serialization
+# - datetime: Timestamp handling
+# - re: Regular expressions for @mention extraction
+# - argparse: CLI interface
+# - pathlib: Cross-platform paths
+# - collections: defaultdict, Counter
+# - typing: Type hints
+#
+# To install (no dependencies required):
+#   pip install .
+#
+# Or simply run directly:
+#   python conversationthreadreconstructor.py --help
+#
+# Philosophy: Zero dependencies = Maximum portability
+# Works anywhere Python 3.8+ is available.

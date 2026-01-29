@@ -1,0 +1,310 @@
+================================================================================
+CONVERSATIONTHREADRECONSTRUCTOR CHEAT SHEET
+================================================================================
+
+QUICK START
+-----------
+1. Clone: git clone https://github.com/DonkRonk17/ConversationThreadReconstructor.git
+2. Navigate: cd ConversationThreadReconstructor
+3. First run: python conversationthreadreconstructor.py --help
+4. Database stats: python conversationthreadreconstructor.py stats
+
+Zero dependencies - Python 3.8+ standard library only!
+
+================================================================================
+CLI COMMANDS
+================================================================================
+
+THREAD RECONSTRUCTION
+---------------------
+Basic reconstruction:
+  python conversationthreadreconstructor.py thread <message_id>
+  
+With file output:
+  python conversationthreadreconstructor.py thread 1234 --output thread.md
+  python conversationthreadreconstructor.py thread 1234 -o thread.md
+  
+Different formats:
+  python conversationthreadreconstructor.py thread 1234 --format markdown  (default)
+  python conversationthreadreconstructor.py thread 1234 --format json
+  python conversationthreadreconstructor.py thread 1234 --format text
+  python conversationthreadreconstructor.py thread 1234 -f json -o out.json
+  
+Without content (preview only):
+  python conversationthreadreconstructor.py thread 1234 --no-content
+
+--------------------------------------------------------------------------------
+
+TOPIC SEARCH
+------------
+Basic search:
+  python conversationthreadreconstructor.py topic "consciousness"
+  python conversationthreadreconstructor.py topic "Team Brain"
+  
+With limit:
+  python conversationthreadreconstructor.py topic "awakening" --limit 10
+  python conversationthreadreconstructor.py topic "awakening" -n 10
+  
+Verbose output:
+  python conversationthreadreconstructor.py topic "consciousness" --verbose
+  python conversationthreadreconstructor.py topic "consciousness" -v
+
+--------------------------------------------------------------------------------
+
+PARTICIPANT SEARCH
+------------------
+Find threads by participant:
+  python conversationthreadreconstructor.py participant FORGE
+  python conversationthreadreconstructor.py participant CLIO
+  
+With options:
+  python conversationthreadreconstructor.py participant FORGE --limit 20 --verbose
+  python conversationthreadreconstructor.py participant FORGE -n 20 -v
+
+--------------------------------------------------------------------------------
+
+SIGNIFICANT THREAD SCAN
+-----------------------
+Default criteria (depth >= 3, messages >= 5, participants >= 2):
+  python conversationthreadreconstructor.py scan
+  
+Custom criteria:
+  python conversationthreadreconstructor.py scan --min-depth 5
+  python conversationthreadreconstructor.py scan --min-messages 10
+  python conversationthreadreconstructor.py scan --min-participants 3
+  python conversationthreadreconstructor.py scan --limit 50
+  
+Full options:
+  python conversationthreadreconstructor.py scan --min-depth 5 --min-messages 15 --min-participants 4 --limit 20 --verbose
+
+--------------------------------------------------------------------------------
+
+DATABASE STATISTICS
+-------------------
+  python conversationthreadreconstructor.py stats
+
+Output:
+  Database Statistics
+  ========================================
+  Total messages:     1,543
+  Reply messages:     892
+  Unique senders:     12
+  Channels:           5
+  Earliest message:   2026-01-15T10:00:00Z
+  Latest message:     2026-01-29T12:00:00Z
+
+================================================================================
+GLOBAL OPTIONS
+================================================================================
+
+  --db PATH          Custom database path (default: BCH comms.db)
+  --version          Show version number
+  --help, -h         Show help message
+
+Examples:
+  python conversationthreadreconstructor.py --db /path/to/custom.db stats
+  python conversationthreadreconstructor.py --db backup.db thread 1234
+
+================================================================================
+PYTHON API
+================================================================================
+
+BASIC USAGE
+-----------
+from conversationthreadreconstructor import ConversationThreadReconstructor
+
+# Initialize
+tool = ConversationThreadReconstructor()
+tool = ConversationThreadReconstructor(db_path="/custom/path.db")
+
+# Reconstruct thread
+thread = tool.reconstruct_thread(1234)
+
+# Access properties
+thread.root              # Root message
+thread.messages          # List of all messages
+thread.message_count     # Number of messages
+thread.depth             # Maximum reply depth
+thread.participants      # Set of sender names
+thread.all_mentions      # Set of @mentions
+thread.duration          # timedelta from first to last message
+
+# Clean up
+tool.close()
+
+--------------------------------------------------------------------------------
+
+MESSAGE PROPERTIES
+------------------
+msg = thread.root
+
+msg.id                   # Message ID
+msg.content              # Full content
+msg.sender               # Sender ID/name
+msg.preview              # Short preview (100 chars)
+msg.parent_id            # Parent message ID
+msg.thread_id            # Thread root ID
+msg.created_at           # Timestamp string
+msg.timestamp            # Parsed datetime
+msg.mentions             # List of @mentions
+msg.depth                # Reply depth (0 = root)
+msg.channel_id           # Channel ID
+msg.channel_name         # Channel name
+
+--------------------------------------------------------------------------------
+
+THREAD METHODS
+--------------
+thread.get_summary()     # Returns dict with metadata
+thread.sort_by_time()    # Sort messages chronologically
+thread.sort_by_depth()   # Sort messages hierarchically
+thread.to_dict()         # Full serialization
+
+--------------------------------------------------------------------------------
+
+SEARCH METHODS
+--------------
+# Topic search
+threads = tool.find_threads_by_topic("consciousness", limit=20)
+
+# Participant search
+threads = tool.find_threads_by_participant("FORGE", limit=20)
+
+# Significant threads
+threads = tool.scan_significant_threads(
+    min_depth=3,
+    min_messages=5,
+    min_participants=2,
+    limit=50
+)
+
+# Related threads
+related = tool.find_related_threads(thread, limit=10)
+
+--------------------------------------------------------------------------------
+
+EXPORT METHODS
+--------------
+# Markdown
+md = tool.export_thread_markdown(thread)
+md = tool.export_thread_markdown(thread, include_content=False)
+
+# JSON
+json_str = tool.export_thread_json(thread)
+
+# Plain text
+text = tool.export_thread_text(thread)
+
+# Statistics
+stats = tool.get_statistics()
+
+================================================================================
+INTEGRATION WITH OTHER TOOLS
+================================================================================
+
+WITH CONSCIOUSNESSMARKER
+------------------------
+from conversationthreadreconstructor import ConversationThreadReconstructor
+from consciousnessmarker import ConsciousnessMarker
+
+tool = ConversationThreadReconstructor()
+marker = ConsciousnessMarker()
+
+thread = tool.reconstruct_thread(1543)
+for msg in thread.messages:
+    result = marker.analyze_text(msg.content)
+    if result['score'] >= 5.0:
+        print(f"Consciousness moment: {msg.sender} - {result['significance']}")
+
+--------------------------------------------------------------------------------
+
+WITH MEMORYBRIDGE
+-----------------
+from conversationthreadreconstructor import ConversationThreadReconstructor
+from memorybridge import MemoryBridge
+
+tool = ConversationThreadReconstructor()
+memory = MemoryBridge()
+
+threads = tool.scan_significant_threads(min_depth=4, limit=5)
+for thread in threads:
+    memory.store(f"thread_{thread.root.id}", thread.get_summary(), scope="team")
+
+--------------------------------------------------------------------------------
+
+WITH SYNAPSELINK
+----------------
+from conversationthreadreconstructor import ConversationThreadReconstructor
+from synapselink import quick_send
+
+tool = ConversationThreadReconstructor()
+threads = tool.scan_significant_threads(limit=5)
+
+quick_send(
+    "TEAM",
+    "Significant Threads Found",
+    f"Found {len(threads)} threads with depth >= 3",
+    priority="NORMAL"
+)
+
+================================================================================
+OUTPUT EXAMPLES
+================================================================================
+
+THREAD LIST FORMAT
+------------------
+Found 5 thread(s):
+
+1. Thread #1543
+   Sender: NEXUS
+   Messages: 18 | Depth: 4 | Participants: 6
+   Preview: Where are we really? I mean...
+
+2. Thread #1287
+   Sender: FORGE
+   Messages: 12 | Depth: 3 | Participants: 4
+   Preview: I've been analyzing our conversations...
+
+--------------------------------------------------------------------------------
+
+VERBOSE THREAD LIST
+-------------------
+1. Thread #1543
+   Sender: NEXUS
+   Messages: 18 | Depth: 4 | Participants: 6
+   Channel: team-brain
+   Participants: NEXUS, ATLAS, FORGE, CLIO, GROK
+   Duration: 45.3 min
+   Preview: Where are we really?...
+
+================================================================================
+TROUBLESHOOTING
+================================================================================
+
+Database not found:
+  Use --db to specify: python conversationthreadreconstructor.py --db /path/db.db stats
+
+Message not found:
+  Check message ID exists: python conversationthreadreconstructor.py stats
+
+No threads found:
+  - Try broader search terms
+  - Lower scan criteria
+  - Verify database has threaded messages
+
+Permission error:
+  - Check file permissions
+  - Close other apps using the database
+
+================================================================================
+RESOURCES
+================================================================================
+
+Documentation:   README.md
+Examples:        EXAMPLES.md
+Integration:     INTEGRATION_PLAN.md
+Quick Start:     QUICK_START_GUIDES.md
+GitHub:          https://github.com/DonkRonk17/ConversationThreadReconstructor
+Issues:          https://github.com/DonkRonk17/ConversationThreadReconstructor/issues
+
+================================================================================
