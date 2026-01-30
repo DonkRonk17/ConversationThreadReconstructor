@@ -1,3 +1,5 @@
+<img width="1536" height="1024" alt="image" src="https://github.com/user-attachments/assets/3539695d-b1de-4cc0-8697-fd659641ce4d" />
+
 # 🧵 ConversationThreadReconstructor
 
 **Reconstruct Complete Conversation Threads from BCH Database**
@@ -553,6 +555,9 @@ No threads found.
 | [INTEGRATION_EXAMPLES.md](INTEGRATION_EXAMPLES.md) | Copy-paste integration code |
 
 ---
+
+<img width="2500" height="1024" alt="image" src="https://github.com/user-attachments/assets/906f93e6-df19-4ae1-bbf4-29609bbf992f" />
+
 
 ## 🤝 Contributing
 
